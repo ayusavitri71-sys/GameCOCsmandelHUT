@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CLASH OF CHAMPIONS: CIPHER VAULT ARENA</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2canvas untuk fitur Download Gambar di Halaman Guru -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Google Fonts: Orbitron & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ==========================================================================
+           1. KETENTUAN TEKNIS NAVIGASI & VIEWPORT (ADAPTIF HP 100DVH & LAPTOP)
+           ========================================================================== */
+        html, body {
+            height: 100%;
+            height: 100dvh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #0b1325;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .screen {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            display: none;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 20%, #162447 0%, #0b1325 70%, #060a14 100%);
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ==========================================================================
+           2. TIPOGRAFI & EFEK VISUAL ESPORT / 3D METALLIC
+           ========================================================================== */
+        .font-esport {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .text-metallic-gold {
+            background: linear-gradient(180deg, #fff3b0 0%, #ffb703 45%, #b45309 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 6px rgba(255, 183, 3, 0.4));
+        }
+
+        .text-metallic-steel {
+            background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 50%, #64748b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 3px 8px rgba(0, 242, 254, 0.35));
+        }
+
+        .glow-cyan {
+            box-shadow: 0 0 12px rgba(0, 242, 254, 0.35), inset 0 0 8px rgba(0, 242, 254, 0.18);
+            border-color: #00f2fe;
+        }
+
+        .glow-gold {
+            box-shadow: 0 0 12px rgba(255, 183, 3, 0.4), inset 0 0 8px rgba(255, 183, 3, 0.18);
+            border-color: #ffb703;
+        }
+
+        .glow-crimson {
+            box-shadow: 0 0 12px rgba(244, 63, 94, 0.45), inset 0 0 8px rgba(244, 63, 94, 0.2);
+            border-color: #f43f5e;
+        }
+
+        /* Kartu Vault di Arena */
+        .vault-card {
+            transition: all 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: linear-gradient(145deg, rgba(19, 31, 61, 0.92), rgba(10, 17, 36, 0.96));
+            backdrop-filter: blur(6px);
+        }
+        .vault-card:not(.unlocked):hover {
+            transform: translateY(-2px) scale(1.02);
+            z-index: 10;
+        }
+        .vault-card:not(.unlocked):active {
+            transform: scale(0.96);
+        }
+        .vault-card.unlocked {
+            background: linear-gradient(145deg, rgba(20, 45, 35, 0.92), rgba(10, 25, 20, 0.96));
+            border-color: #fbbf24 !important;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
+            cursor: not-allowed;
+        }
+
+        /* Kartu Tim Interaktif di Leaderboard Arena & Modal */
+        .team-pill-btn {
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .team-pill-btn:hover {
+            border-color: #00f2fe !important;
+            box-shadow: 0 0 8px rgba(0, 242, 254, 0.35);
+        }
+        .team-pill-btn.selected-team {
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.28), rgba(255, 183, 3, 0.28)) !important;
+            border-color: #00f2fe !important;
+            box-shadow: 0 0 12px rgba(0, 242, 254, 0.55);
+        }
+        .team-grid-card {
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .team-grid-card.active-choice {
+            background: linear-gradient(135deg, #0891b2, #0284c7) !important;
+            border-color: #fef08a !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 12px rgba(0, 242, 254, 0.65);
+            transform: scale(1.02);
+        }
+
+        /* Animasi Timer Kritis & Getar Salah */
+        @keyframes pulse-red {
+            0%, 100% { background-color: rgba(220, 38, 38, 0.25); border-color: #ef4444; color: #fca5a5; transform: scale(1); }
+            50% { background-color: rgba(220, 38, 38, 0.75); border-color: #ffffff; color: #ffffff; transform: scale(1.03); }
+        }
+        .timer-critical {
+            animation: pulse-red 0.8s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            15%, 45%, 75% { transform: translateX(-10px); }
+            30%, 60%, 90% { transform: translateX(10px); }
+        }
+        .animate-shake {
+            animation: shake 0.45s ease-in-out;
+        }
+
+        /* Custom Scrollbar tipis untuk area internal kecil */
+        .thin-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+        .thin-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        .thin-scroll::-webkit-scrollbar-thumb { background: #00f2fe; border-radius: 999px; }
+
+        /* ==========================================================================
+           3. STYLING HALAMAN KHUSUS GURU (KARTU DARK FANTASY 5x6 A4)
+           ========================================================================== */
+        .a4-card-sheet {
+            width: 794px;
+            height: 1123px;
+            background: #090d16;
+            padding: 16px;
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 8px;
+        }
+
+        .fantasy-card {
+            background: radial-gradient(circle at center, #064e3b 0%, #022c22 55%, #05080f 100%);
+            border: 2px solid #d4af37;
+            box-shadow: inset 0 0 8px rgba(212, 175, 55, 0.5);
+            border-radius: 8px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            color: #f8fafc;
+        }
+
+        .fantasy-card::before {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            border-radius: 5px;
+            pointer-events: none;
+        }
+
+        /* ==========================================================================
+           4. HALAMAN 2: LEMBAR SOAL CETAK (@media print)
+           ========================================================================== */
+        #printable-worksheet {
+            display: none;
+        }
+
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 10mm;
+            }
+            html, body {
+                height: auto !important;
+                overflow: visible !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+            .screen, .modal-overlay, #confetti-canvas {
+                display: none !important;
+            }
+            body.print-teacher-cards #printable-worksheet {
+                display: none !important;
+            }
+            body.print-teacher-cards #teacher-print-container {
+                display: block !important;
+                position: static !important;
+                width: 100% !important;
+            }
+            body:not(.print-teacher-cards) #printable-worksheet {
+                display: block !important;
+                width: 100%;
+                background: #ffffff;
+                color: #000000;
+                font-family: 'Inter', Arial, sans-serif;
+            }
+            .page-break {
+                page-break-before: always;
+                break-before: page;
+            }
+            .print-box {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Canvas Confetti untuk Kemenangan & Unlock -->
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+    <!-- ==========================================================================
+         SCREEN 1: HALAMAN PEMBUKA & PENGATURAN TIM (COMPACT SETUP SCREEN HP & LAPTOP)
+         ========================================================================== -->
+    <div id="screen-setup" class="screen active justify-between p-2.5 sm:p-4 md:p-5 overflow-y-auto thin-scroll">
+        <!-- Top Bar Setup Ringkas (Satu Baris di HP maupun Laptop) -->
+        <div class="w-full max-w-5xl mx-auto flex justify-between items-center gap-1.5 z-10 shrink-0">
+            <div class="flex items-center gap-1.5 bg-slate-900/85 border border-cyan-500/40 px-2.5 py-1 rounded-full text-[10px] sm:text-xs text-cyan-300 font-semibold">
+                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping shrink-0"></span>
+                <span class="hidden sm:inline">INTERACTIVE BOARD & MOBILE READY</span>
+                <span class="sm:hidden">ARENA READY</span>
+            </div>
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                <button type="button" onclick="window.print()" title="Cetak Lembar Soal A4"
+                    class="bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-600 px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold flex items-center gap-1 transition cursor-pointer">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    <span>SOAL A4</span>
+                </button>
+                <button type="button" onclick="openTeacherAuthModal()" title="Menu Kunci Jawaban Guru"
+                    class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/60 px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold flex items-center gap-1 transition cursor-pointer shadow">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    <span>KUNCI GURU</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Center Content Setup (Compact & Proporsional) -->
+        <div class="flex-1 flex flex-col items-center justify-center max-w-4xl w-full mx-auto gap-2 sm:gap-3 my-auto py-1">
+            <!-- Logo 3D Metallic CLASH OF CHAMPIONS Diperkecil agar Hemat Ruang -->
+            <div class="flex flex-col items-center text-center shrink-0">
+                <div class="relative flex items-center justify-center">
+                    <svg class="w-36 sm:w-48 md:w-56 h-12 sm:h-16 drop-shadow-[0_0_14px_rgba(0,242,254,0.6)]" viewBox="0 0 400 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="wingGradL" x1="0" y1="20" x2="160" y2="90" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#00f2fe"/>
+                                <stop offset="50%" stop-color="#0284c7"/>
+                                <stop offset="100%" stop-color="#0f172a"/>
+                            </linearGradient>
+                            <linearGradient id="wingGradR" x1="400" y1="20" x2="240" y2="90" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#00f2fe"/>
+                                <stop offset="50%" stop-color="#0284c7"/>
+                                <stop offset="100%" stop-color="#0f172a"/>
+                            </linearGradient>
+                            <linearGradient id="steelFrame" x1="150" y1="10" x2="250" y2="110" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#f8fafc"/>
+                                <stop offset="45%" stop-color="#94a3b8"/>
+                                <stop offset="100%" stop-color="#334155"/>
+                            </linearGradient>
+                            <radialGradient id="cyanGem" cx="50%" cy="40%" r="60%">
+                                <stop offset="0%" stop-color="#ffffff"/>
+                                <stop offset="35%" stop-color="#00f2fe"/>
+                                <stop offset="100%" stop-color="#0369a1"/>
+                            </radialGradient>
+                        </defs>
+                        <!-- Left Esport Wings -->
+                        <path d="M155 45 L30 15 L65 48 L15 45 L75 72 L45 78 L145 88 Z" fill="url(#wingGradL)" stroke="#38bdf8" stroke-width="1.5"/>
+                        <path d="M150 55 L60 35 L95 62 L145 75 Z" fill="#00f2fe" fill-opacity="0.35"/>
+                        <!-- Right Esport Wings -->
+                        <path d="M245 45 L370 15 L335 48 L385 45 L325 72 L355 78 L255 88 Z" fill="url(#wingGradR)" stroke="#38bdf8" stroke-width="1.5"/>
+                        <path d="M250 55 L340 35 L305 62 L255 75 Z" fill="#00f2fe" fill-opacity="0.35"/>
+                        <!-- Central Metallic Shield -->
+                        <path d="M200 10 L248 28 L240 78 L200 110 L160 78 L152 28 Z" fill="url(#steelFrame)" stroke="#ffb703" stroke-width="3"/>
+                        <path d="M200 18 L238 33 L231 73 L200 99 L169 73 L162 33 Z" fill="#0b1325"/>
+                        <!-- Glowing Cyan Core Gem -->
+                        <polygon points="200,26 224,46 216,74 200,88 184,74 176,46" fill="url(#cyanGem)" stroke="#ffffff" stroke-width="1.5"/>
+                        <polygon points="200,34 214,48 200,76 186,48" fill="#ffffff" fill-opacity="0.45"/>
+                    </svg>
+                </div>
+                <h1 class="font-esport text-xl sm:text-3xl md:text-4xl font-black tracking-wider text-metallic-steel uppercase leading-tight">
+                    CLASH OF <span class="text-metallic-gold">CHAMPIONS</span>
+                </h1>
+                <div class="mt-1 px-3 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-cyan-300 font-esport text-[10px] sm:text-xs tracking-[0.2em] uppercase">
+                    DIGITAL VAULT LOCK ARENA
+                </div>
+            </div>
+
+            <!-- Form Pengaturan Pertandingan Ringkas -->
+            <div class="w-full bg-slate-900/90 border border-cyan-500/40 rounded-2xl p-2.5 sm:p-4 shadow-[0_0_25px_rgba(0,0,0,0.75)] backdrop-blur-md">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mb-2.5">
+                    <!-- Jumlah Tim -->
+                    <div class="bg-slate-950/85 border border-slate-700/80 rounded-xl p-2 sm:p-2.5">
+                        <label for="input-team-count" class="block text-[10px] sm:text-xs font-bold text-cyan-400 uppercase tracking-wider mb-1">Jumlah Tim (1-16)</label>
+                        <input type="number" id="input-team-count" min="1" max="16" value="16" onchange="generateTeamNameInputs()" oninput="generateTeamNameInputs()"
+                            class="w-full bg-slate-900 border border-cyan-500/50 rounded-lg px-2.5 py-1 sm:py-1.5 text-base sm:text-lg font-esport font-bold text-white focus:outline-none focus:border-amber-400">
+                    </div>
+
+                    <!-- Durasi Waktu -->
+                    <div class="bg-slate-950/85 border border-slate-700/80 rounded-xl p-2 sm:p-2.5">
+                        <label for="input-duration" class="block text-[10px] sm:text-xs font-bold text-amber-400 uppercase tracking-wider mb-1">Durasi (Menit)</label>
+                        <input type="number" id="input-duration" min="1" max="120" value="15"
+                            class="w-full bg-slate-900 border border-amber-500/50 rounded-lg px-2.5 py-1 sm:py-1.5 text-base sm:text-lg font-esport font-bold text-white focus:outline-none focus:border-cyan-400">
+                    </div>
+
+                    <!-- Info Bank Soal -->
+                    <div class="col-span-2 sm:col-span-1 bg-slate-950/85 border border-slate-700/80 rounded-xl p-2 sm:p-2.5 flex flex-col justify-center">
+                        <span class="text-[10px] sm:text-xs font-bold text-emerald-400 uppercase tracking-wider">Paket Soal Aktif</span>
+                        <p class="text-[11px] text-slate-300 mt-0.5 leading-tight">30 Vault Cipher (Numerasi, Logika, Pengetahuan Umum SMA)</p>
+                    </div>
+                </div>
+
+                <!-- Daftar Input Nama Tim Dinamis (Tinggi Ringkas) -->
+                <div class="mb-2.5 sm:mb-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[10px] sm:text-xs font-bold text-slate-300 uppercase tracking-wider">Konfigurasi Nama Tim:</span>
+                        <span class="text-[10px] text-cyan-400">Tap untuk ubah nama</span>
+                    </div>
+                    <div id="team-names-container" class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 max-h-24 sm:max-h-28 overflow-y-auto thin-scroll pr-1">
+                        <!-- Diisi otomatis oleh JS -->
+                    </div>
+                </div>
+
+                <!-- Tombol Utama Masuk Arena (Sticky & Selalu Terlihat Jelas) -->
+                <button type="button" onclick="startArenaMatch()"
+                    class="sticky bottom-0 z-20 w-full py-2.5 sm:py-3.5 rounded-xl font-esport text-sm sm:text-lg font-black tracking-wider sm:tracking-widest uppercase text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-amber-400 hover:from-amber-300 hover:to-cyan-300 shadow-[0_0_22px_rgba(0,242,254,0.65)] transition transform active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                    <span>MASUK ARENA PERTANDINGAN</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer Setup Ringkas -->
+        <div class="w-full text-center text-[10px] sm:text-xs text-slate-400 pt-1 shrink-0">
+            Dikembangkan oleh <span class="text-cyan-400 font-semibold">Guru Inovatif SMA</span> &bull; Cipher Vault Engine
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         SCREEN 2: PAPAN ARENA & GRID 30 VAULT (ARENA SCREEN - 100DVH FIT HP & LAPTOP)
+         ========================================================================== -->
+    <div id="screen-arena" class="screen p-1.5 sm:p-2.5 md:p-3 gap-1.5 sm:gap-2">
+        <!-- Header Arena Adaptif: Baris 1 Kontrol & Timer, Baris 2 Leaderboard di HP (1 Baris di Desktop) -->
+        <header class="w-full bg-slate-900/95 border border-cyan-500/40 rounded-xl px-2 sm:px-3 py-1.5 flex flex-wrap lg:flex-nowrap items-center justify-between gap-1.5 sm:gap-2 shrink-0 shadow-lg">
+            <!-- Kiri: Brand Mini & Timer -->
+            <div class="flex items-center gap-1.5 sm:gap-2.5">
+                <div class="hidden sm:flex flex-col">
+                    <span class="font-esport text-[11px] font-black text-cyan-400 tracking-wider">CIPHER VAULT</span>
+                    <span class="text-[10px] text-amber-400 font-bold" id="arena-progress-text">0 / 30 TERBUKA</span>
+                </div>
+
+                <!-- Timer Countdown -->
+                <div id="timer-box" class="flex items-center gap-1.5 bg-slate-950 border-2 border-cyan-400/70 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span id="timer-display" class="font-esport text-base sm:text-xl md:text-2xl font-black text-white tracking-wider">15:00</span>
+                </div>
+
+                <!-- Tombol Pause / Resume -->
+                <button type="button" id="btn-pause-toggle" onclick="togglePauseTimer()"
+                    class="bg-amber-500/20 hover:bg-amber-500/40 border border-amber-400/60 text-amber-300 px-2 py-1 sm:py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer transition">
+                    <span id="pause-icon">⏸</span>
+                    <span id="pause-label" class="hidden md:inline">PAUSE</span>
+                </button>
+
+                <!-- Toggle BGM Synthesizer -->
+                <button type="button" id="btn-bgm-toggle" onclick="toggleBGM()"
+                    class="bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-400/60 text-cyan-300 px-2 py-1 sm:py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer transition">
+                    <span id="bgm-icon">🔊</span>
+                    <span id="bgm-label" class="hidden md:inline">BGM ON</span>
+                </button>
+            </div>
+
+            <!-- Kanan (Mobile: Sejajar dengan Timer di Baris 1; Desktop: Pindah ke Kanan via order) -->
+            <div class="flex items-center gap-1.5 shrink-0 lg:order-3">
+                <span class="sm:hidden text-[10px] font-esport font-bold text-amber-400 mr-0.5" id="arena-progress-mobile">0/30</span>
+                <button type="button" onclick="openTeacherAuthModal()" title="Menu Kunci Jawaban Guru"
+                    class="bg-slate-800 hover:bg-amber-600/30 border border-amber-400/60 text-amber-300 p-1.5 sm:p-2 rounded-lg cursor-pointer transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                </button>
+                <button type="button" onclick="finishGameEarly()"
+                    class="bg-rose-600/85 hover:bg-rose-500 text-white px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-bold cursor-pointer transition">
+                    SELESAI
+                </button>
+            </div>
+
+            <!-- Tengah / Baris 2 di HP: Leaderboard Real-Time Horizontal Scroll -->
+            <div id="arena-leaderboard" class="w-full lg:w-auto lg:flex-1 lg:order-2 flex items-center gap-1.5 overflow-x-auto thin-scroll py-0.5 px-0.5 border-t border-slate-800 lg:border-t-0 pt-1 lg:pt-0">
+                <!-- Diisi dinamis oleh JS -->
+            </div>
+        </header>
+
+        <!-- Legenda Tingkat Kesulitan Mini (Ringkas di HP) -->
+        <div class="w-full flex items-center justify-between px-1 text-[9px] sm:text-[11px] font-semibold shrink-0">
+            <div class="flex items-center gap-2 sm:gap-4">
+                <span class="flex items-center gap-1 text-cyan-300"><span class="w-2 h-2 rounded-sm bg-cyan-400 inline-block"></span> 1–10: 100PT</span>
+                <span class="flex items-center gap-1 text-amber-300"><span class="w-2 h-2 rounded-sm bg-amber-400 inline-block"></span> 11–20: 200PT</span>
+                <span class="flex items-center gap-1 text-rose-400"><span class="w-2 h-2 rounded-sm bg-rose-500 inline-block"></span> 21–30: 300PT</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <span class="text-slate-400 hidden md:inline">Tim Aktif:</span>
+                <span id="active-team-indicator" class="px-2 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 font-esport text-[9px] sm:text-[11px] font-bold truncate max-w-[130px] sm:max-w-none">
+                    TIM 1
+                </span>
+            </div>
+        </div>
+
+        <!-- Grid 30 Kartu Vault (5 kolom x 6 baris di HP portrait, 6 kolom x 5 baris di tablet/laptop) -->
+        <main id="vault-grid" class="flex-1 w-full grid grid-cols-5 sm:grid-cols-6 grid-rows-6 sm:grid-rows-5 gap-1.5 sm:gap-2 min-h-0">
+            <!-- 30 Kartu Vault dirender oleh JS -->
+        </main>
+    </div>
+
+    <!-- ==========================================================================
+         SCREEN 3: HALAMAN AKHIR / SELEBRASI PEMENANG (GAME OVER SCREEN)
+         ========================================================================== -->
+    <div id="screen-gameover" class="screen justify-between p-3 sm:p-5 md:p-6">
+        <div class="text-center shrink-0">
+            <span class="px-3 py-0.5 rounded-full bg-amber-500/20 border border-amber-400 text-amber-300 font-esport text-[10px] sm:text-xs tracking-widest uppercase">ARENA COMPLETED</span>
+            <h1 class="font-esport text-2xl sm:text-4xl md:text-5xl font-black text-metallic-gold mt-1 tracking-wider">HALL OF CHAMPIONS</h1>
+            <p class="text-slate-300 text-xs sm:text-sm">Klasemen Akhir Pertandingan Cipher Vault Arena</p>
+        </div>
+
+        <!-- Podium Juara 1, 2, 3 -->
+        <div id="podium-container" class="flex items-end justify-center gap-2.5 sm:gap-6 my-2 h-36 sm:h-48 shrink-0">
+            <!-- Diisi dinamis oleh JS -->
+        </div>
+
+        <!-- Tabel Skor Lengkap Semua Tim -->
+        <div class="flex-1 w-full max-w-4xl mx-auto bg-slate-900/90 border border-cyan-500/40 rounded-2xl p-2.5 sm:p-3 overflow-y-auto thin-scroll min-h-0">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-700 text-[10px] sm:text-xs font-esport text-cyan-400 uppercase">
+                        <th class="py-1.5 px-2 sm:px-3">Rank</th>
+                        <th class="py-1.5 px-2 sm:px-3">Nama Tim</th>
+                        <th class="py-1.5 px-2 sm:px-3 text-center">Vault</th>
+                        <th class="py-1.5 px-2 sm:px-3 text-right">Skor</th>
+                    </tr>
+                </thead>
+                <tbody id="gameover-leaderboard-body" class="divide-y divide-slate-800 text-xs sm:text-sm">
+                    <!-- Diisi JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tombol Navigasi Bawah -->
+        <div class="flex justify-center gap-4 pt-2 shrink-0">
+            <button type="button" onclick="resetToSetup()"
+                class="px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl font-esport text-xs sm:text-sm font-bold uppercase tracking-wider bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg cursor-pointer transition">
+                MAIN LAGI / SETUP BARU
+            </button>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         SCREEN 4: HALAMAN KHUSUS GURU (TEACHER DASHBOARD - TERPISAH)
+         ========================================================================== -->
+    <div id="screen-teacher" class="screen p-2 sm:p-4 md:p-5 gap-2 sm:gap-3">
+        <!-- Header Teacher Dashboard -->
+        <div class="w-full bg-slate-900/95 border border-amber-400/50 rounded-xl px-3 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0">
+            <div class="flex items-center gap-2">
+                <span class="bg-amber-500 text-slate-950 font-esport font-black text-[10px] sm:text-xs px-2 py-0.5 rounded">TEACHER MODE</span>
+                <h2 class="font-esport text-xs sm:text-base md:text-lg font-bold text-white">KARTU SOAL & KUNCI JAWABAN (5x6 A4)</h2>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+                <button type="button" id="tab-btn-student" onclick="switchTeacherTab('student')"
+                    class="px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-emerald-600 text-white border border-emerald-400 cursor-pointer">
+                    SOAL SISWA (30)
+                </button>
+                <button type="button" id="tab-btn-key" onclick="switchTeacherTab('key')"
+                    class="px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-slate-800 text-slate-300 border border-slate-600 cursor-pointer">
+                    KUNCI GURU (30)
+                </button>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+                <button type="button" onclick="downloadTeacherSheetImage()"
+                    class="bg-cyan-600 hover:bg-cyan-500 text-white px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold flex items-center gap-1 cursor-pointer shadow">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span>PNG</span>
+                </button>
+                <button type="button" onclick="printTeacherCards()"
+                    class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold flex items-center gap-1 cursor-pointer shadow">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    <span>PRINT</span>
+                </button>
+                <button type="button" onclick="returnFromTeacherDashboard()"
+                    class="bg-rose-600 hover:bg-rose-500 text-white px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold cursor-pointer">
+                    TUTUP
+                </button>
+            </div>
+        </div>
+
+        <!-- Area Preview A4 Dark Fantasy Grid 5x6 -->
+        <div class="flex-1 w-full bg-slate-950/90 border border-slate-800 rounded-xl p-2 sm:p-4 overflow-auto thin-scroll flex justify-center items-start">
+            <div id="teacher-print-container">
+                <div id="a4-fantasy-sheet" class="a4-card-sheet shadow-2xl border-2 border-amber-500/40">
+                    <!-- 30 Kartu Dark Fantasy 5x6 dirender oleh JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MODAL 1: POP-UP INPUT PASSWORD & KEYBOARD ADAPTIF (COMPACT HP & LAPTOP)
+         ========================================================================== -->
+    <div id="modal-vault-input" class="modal-overlay fixed inset-0 bg-slate-950/85 backdrop-blur-md z-40 hidden items-center justify-center p-2 sm:p-3">
+        <div class="w-full max-w-2xl max-h-[92dvh] overflow-y-auto thin-scroll bg-slate-900 border-2 border-cyan-400 rounded-2xl p-3 sm:p-5 shadow-[0_0_40px_rgba(0,242,254,0.4)] flex flex-col gap-2 sm:gap-2.5">
+            <!-- Header Modal Ringkas -->
+            <div class="flex justify-between items-center border-b border-slate-700 pb-2 shrink-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span id="modal-vault-tier" class="text-[10px] font-esport font-bold px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-400/50">LEVEL MUDAH</span>
+                    <h3 id="modal-vault-title" class="font-esport text-base sm:text-xl font-black text-white">VAULT #01 - 100 PTS</h3>
+                </div>
+                <button type="button" onclick="closeVaultModal()" class="text-slate-300 hover:text-white bg-slate-800 hover:bg-rose-600 w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-sm font-bold cursor-pointer transition shrink-0">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Pilihan Tim (Grid Klik Langsung) & Input Kode Password -->
+            <div class="flex flex-col gap-2">
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-[10px] sm:text-xs font-bold text-amber-400 uppercase">1. Pilih Tim Penjawab:</label>
+                        <span id="modal-selected-team-badge" class="text-[10px] sm:text-xs font-esport font-black text-cyan-300">TERPILIH: TIM 1</span>
+                    </div>
+                    <input type="hidden" id="modal-team-select" value="0">
+                    <div id="modal-team-buttons-grid" class="grid grid-cols-4 sm:grid-cols-8 gap-1 max-h-20 sm:max-h-24 overflow-y-auto thin-scroll p-0.5">
+                        <!-- Tombol Tim 1 sampai Tim 16 diisi JS -->
+                    </div>
+                </div>
+                <div>
+                    <label for="modal-password-input" class="block text-[10px] sm:text-xs font-bold text-cyan-400 uppercase mb-1">2. Masukkan Kode Password Vault:</label>
+                    <input type="text" id="modal-password-input" autocomplete="off" placeholder="Ketik atau tap keyboard layar..."
+                        class="w-full bg-slate-950 border-2 border-cyan-400 rounded-xl px-3 py-1.5 sm:py-2 text-base sm:text-xl font-esport font-bold text-cyan-300 tracking-wider uppercase focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Virtual Touch Keyboard Adaptif -->
+            <div class="bg-slate-950/90 border border-slate-700/90 rounded-xl p-1.5 sm:p-2">
+                <div class="flex justify-between items-center mb-1 px-1">
+                    <span id="keyboard-mode-label" class="text-[9px] sm:text-[11px] font-bold text-slate-400 uppercase">VIRTUAL KEYBOARD</span>
+                    <button type="button" onclick="clearModalInput()" class="text-[10px] sm:text-[11px] font-bold text-rose-400 hover:text-rose-300 cursor-pointer">HAPUS SEMUA</button>
+                </div>
+                <div id="virtual-keyboard-container" class="flex flex-col gap-1">
+                    <!-- Tombol keyboard dirender adaptif oleh JS -->
+                </div>
+            </div>
+
+            <!-- Action Buttons (Selalu Terlihat Jelas) -->
+            <div class="grid grid-cols-2 gap-2.5 pt-0.5 shrink-0">
+                <button type="button" onclick="closeVaultModal()"
+                    class="py-2.5 sm:py-3 rounded-xl font-esport text-xs sm:text-sm font-bold uppercase bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 cursor-pointer transition">
+                    BATAL
+                </button>
+                <button type="button" onclick="submitVaultPassword()"
+                    class="py-2.5 sm:py-3 rounded-xl font-esport text-xs sm:text-base font-black uppercase bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.5)] cursor-pointer transition">
+                    🔓 UNLOCK VAULT
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MODAL 2: OVERLAY BESAR HASIL JAWABAN (ACCESS GRANTED / ACCESS DENIED)
+         ========================================================================== -->
+    <div id="modal-feedback" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4">
+        <div id="feedback-card" class="w-full max-w-2xl rounded-3xl p-6 sm:p-10 text-center border-4 shadow-2xl transform transition-all">
+            <div id="feedback-icon" class="text-5xl sm:text-7xl mb-3">🔓</div>
+            <h2 id="feedback-title" class="font-esport text-2xl sm:text-4xl font-black tracking-wider uppercase mb-2">ACCESS GRANTED!</h2>
+            <p id="feedback-subtitle" class="font-esport text-sm sm:text-xl font-bold mb-5">VAULT UNLOCKED! +100 PTS</p>
+            <button type="button" onclick="closeFeedbackModal()"
+                class="px-6 py-2.5 sm:px-8 sm:py-3 rounded-xl font-esport text-xs sm:text-base font-black uppercase bg-white text-slate-950 hover:bg-slate-200 shadow-xl cursor-pointer transition">
+                LANJUTKAN PERTANDINGAN
+            </button>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MODAL 3: OTENTIKASI PASSWORD GURU ('1234')
+         ========================================================================== -->
+    <div id="modal-teacher-auth" class="modal-overlay fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden items-center justify-center p-3">
+        <div id="teacher-auth-card" class="w-full max-w-sm bg-slate-900 border-2 border-amber-400 rounded-2xl p-5 text-center shadow-2xl">
+            <div class="w-12 h-12 mx-auto bg-amber-500/20 border border-amber-400 rounded-full flex items-center justify-center text-amber-400 text-xl mb-2.5">
+                🔐
+            </div>
+            <h3 class="font-esport text-lg font-black text-white uppercase">AKSES RAHASIA GURU</h3>
+            <p class="text-xs text-slate-400 mt-1 mb-3">Masukkan PIN Keamanan Guru untuk membuka Dashboard Soal & Kunci Jawaban</p>
+            <input type="password" id="teacher-pin-input" maxlength="10" placeholder="PIN (1234)..."
+                class="w-full bg-slate-950 border border-amber-400/70 rounded-xl px-4 py-2.5 text-center font-esport text-lg tracking-[0.4em] text-amber-300 focus:outline-none mb-2">
+            <p id="teacher-auth-error" class="text-xs text-rose-400 font-bold h-4 mb-2"></p>
+            <div class="grid grid-cols-2 gap-2.5">
+                <button type="button" onclick="closeTeacherAuthModal()" class="py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs uppercase cursor-pointer">BATAL</button>
+                <button type="button" onclick="verifyTeacherPin()" class="py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-esport font-black text-xs uppercase cursor-pointer">BUKA AKSES</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         HALAMAN 2: LEMBAR SOAL CETAK A4 (HANYA TAMPIL SAAT @media print)
+         ========================================================================== -->
+    <div id="printable-worksheet">
+        <div style="border-bottom: 3px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 style="margin: 0; font-size: 18px; font-weight: 900; letter-spacing: 0.5px;">LEMBAR KERJA TIM: NUMERASI, LOGIKA & PENGETAHUAN UMUM</h1>
+                    <p style="margin: 2px 0 0 0; font-size: 11px; font-weight: 600;">CLASH OF CHAMPIONS: CIPHER VAULT ARENA (JENJANG SMA KELAS X - XII)</p>
+                </div>
+                <div style="border: 2px solid #000; padding: 4px 10px; font-size: 11px; font-weight: 800;">
+                    30 CIPHER VAULTS
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; font-size: 11px; font-weight: 700;">
+                <div style="border: 1px solid #000; padding: 5px 8px;">Nama Kelompok: ..............................</div>
+                <div style="border: 1px solid #000; padding: 5px 8px;">Kelas: ..............................</div>
+                <div style="border: 1px solid #000; padding: 5px 8px;">Anggota: ....................................</div>
+            </div>
+            <p style="margin: 8px 0 0 0; font-size: 11px; background: #f3f4f6; padding: 5px 8px; border: 1px dashed #000;">
+                <strong>PETUNJUK KERJA:</strong> Selesaikan setiap soal pada kotak kartu di bawah ini. Jawaban akhir merupakan <strong>KODE RAHASIA / PASSWORD</strong> untuk membuka kunci Vault pada layar proyektor arena!
+            </p>
+        </div>
+
+        <div id="print-questions-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <!-- Diisi otomatis oleh JS -->
+        </div>
+
+        <div class="page-break">
+            <div style="border-bottom: 3px solid #000; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="margin: 0; font-size: 18px; font-weight: 900;">KUNCI JAWABAN & PASSWORD VAULT (KHUSUS GURU)</h2>
+                    <p style="margin: 2px 0 0 0; font-size: 11px;">CLASH OF CHAMPIONS: CIPHER VAULT ARENA — DOKUMEN RAHASIA PENGAWAS</p>
+                </div>
+                <span style="border: 2px solid #000; padding: 4px 8px; font-size: 11px; font-weight: 900;">RAHASIA GURU</span>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                <thead>
+                    <tr style="background: #e5e7eb;">
+                        <th style="border: 1px solid #000; padding: 5px; width: 12%;">Vault</th>
+                        <th style="border: 1px solid #000; padding: 5px; width: 10%;">Poin</th>
+                        <th style="border: 1px solid #000; padding: 5px; width: 50%;">Ringkasan Soal</th>
+                        <th style="border: 1px solid #000; padding: 5px; width: 28%;">Password / Kunci</th>
+                    </tr>
+                </thead>
+                <tbody id="print-answer-key-body">
+                    <!-- Diisi otomatis oleh JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         JAVASCRIPT ENGINE (NAVIGASI, BANK SOAL 30 VAULT, WEB AUDIO API, LOGIKA)
+         ========================================================================== -->
+    <script>
+        /* --------------------------------------------------------------------------
+           1. BANK SOAL 30 PERTANYAAN & KUNCI JAWABAN
+           -------------------------------------------------------------------------- */
+        const VAULT_QUESTIONS = [
+            // LEVEL MUDAH: KARTU 1 - 10 (100 POIN)
+            { id: 1, points: 100, tier: "MUDAH", type: "text", question: "Dalam rantai makanan: Padi -> Tikus -> Ular -> Elang. Organisme yang berperan sebagai konsumen tingkat II adalah?", answer: "ULAR" },
+            { id: 2, points: 100, tier: "MUDAH", type: "text", question: "Suku ke-7 dari barisan aritmetika: 3, 7, 11, 15, ... adalah?", answer: "27" },
+            { id: 3, points: 100, tier: "MUDAH", type: "text", question: "Kerajaan Hindu tertua di Indonesia yang terletak di Kalimantan Timur dengan rajanya Mulawarman adalah?", answer: "KUTAI" },
+            { id: 4, points: 100, tier: "MUDAH", type: "text", question: "Lambang sila keempat Pancasila yang berbunyi Kerakyatan yang Dipimpin oleh Hikmat Kebijaksanaan adalah kepala?", answer: "BANTENG" },
+            { id: 5, points: 100, tier: "MUDAH", type: "text", question: "Sinonim baku dari kata 'EPILOG' dalam karya sastra atau drama adalah?", answer: "PENUTUP" },
+            { id: 6, points: 100, tier: "MUDAH", type: "text", question: "Rukun Iman ke-5 dalam ajaran Islam adalah iman kepada hari?", answer: "KIAMAT" },
+            { id: 7, points: 100, tier: "MUDAH", type: "text", question: "Norma sosial yang bersumber dari hati nurani manusia disebut norma?", answer: "KESUSILAAN" },
+            { id: 8, points: 100, tier: "MUDAH", type: "text", question: "English Vocabulary: What is the opposite (antonym) of the word 'ANCIENT'?", answer: "MODERN" },
+            { id: 9, points: 100, tier: "MUDAH", type: "teks", question: "Jika 3x - 5 = 16, maka nilai dari 2x + 4 adalah...", answer: "18" },
+            { id: 10, points: 100, tier: "MUDAH", type: "text", question: "Kerajaan Buddha maritim terbesar di Sumatra yang berpusat di Palembang adalah?", answer: "SRIWIJAYA" },
+
+            // LEVEL SEDANG: KARTU 11 - 20 (200 POIN)
+            { id: 11, points: 200, tier: "SEDANG", type: "text", question: "Tentukan angka selanjutnya dari pola deret berikut: 2, 3, 5, 8, 12, 17, ...?", answer: "23" },
+            { id: 12, points: 200, tier: "SEDANG", type: "text", question: "Antonim yang paling tepat untuk kata 'Fasih' adalah?", answer: "Gagap" },
+            { id: 13, points: 200, tier: "SEDANG", type: "text", question: "Kitab Sutasoma yang memuat semboyan 'Bhinneka Tunggal Ika' ditulis oleh Mpu?", answer: "TANTULAR" },
+            { id: 14, points: 200, tier: "SEDANG", type: "text", question: "Proses pembuatan makanan pada tumbuhan hijau dengan bantuan cahaya matahari disebut...?", answer: "Fotosintesis" },
+            { id: 15, points: 200, tier: "SEDANG", type: "text", question: "Nilai Pancasila sebagai dasar filsafat negara bersifat tetap dan tidak dapat diubah, disebut nilai?", answer: "DASAR" },
+            { id: 16, points: 200, tier: "SEDANG", type: "text", question: "Rukun Iman ke-6 adalah percaya kepada Qada dan?", answer: "QADAR" },
+            { id: 17, points: 200, tier: "SEDANG", type: "text", question: "Norma yang memiliki sanksi paling tegas, nyata, dan memaksa oleh aparat negara adalah norma?", answer: "HUKUM" },
+            { id: 18, points: 200, tier: "SEDANG", type: "text", question: "English Vocabulary: A person who is fluent in two languages is called?", answer: "BILINGUAL" },
+            { id: 19, points: 200, tier: "SEDANG", type: "teks", question: "Alat musik tradisional khas Nusa Tenggara Timur (NTT) yang terbuat dari daun lontar dan dimainkan dengan cara dipetik adalah...", answer: "sasando" },
+            { id: 20, points: 200, tier: "SEDANG", type: "text", question: "Barisan bilangan Fibonacci: 1, 1, 2, 3, 5, 8, 13, X. Berapakah nilai X?", answer: "21" },
+
+            // LEVEL SULIT: KARTU 21 - 30 (300 POIN)
+            { id: 21, points: 300, tier: "SULIT", type: "text", question: "Jika suku ke-3 barisan aritmetika adalah 14 dan suku ke-7 adalah 30, maka suku ke-12 adalah?", answer: "50" },
+            { id: 22, points: 300, tier: "SULIT", type: "text", question: "Raja terbesar Kerajaan Majapahit yang berhasil menyatukan Nusantara bersama Mahapatih Gajah Mada adalah?", answer: "HAYAM WURUK" },
+            { id: 23, points: 300, tier: "SULIT", type: "text", question: "Benua terluas di permukaan bumi adalah...", answer: "Asia" },
+            { id: 24, points: 300, tier: "SULIT", type: "text", question: "Organisme pengurai yang menguraikan bangkai makhluk hidup menjadi zat anorganik dalam ekosistem disebut?", answer: "DEKOMPOSER" },
+            { id: 25, points: 300, tier: "SULIT", type: "text", question: "Panitia Sembilan merumuskan rancangan dasar negara pada 22 Juni 1945 yang dikenal dengan nama?", answer: "PIAGAM JAKARTA" },
+            { id: 26, points: 300, tier: "SULIT", type: "teks", question: "Organisasi internasional yang dibentuk setelah Perang Dunia II dengan tujuan utama menjaga perdamaian dan keamanan dunia adalah...", answer: "PBB" },
+            { id: 27, points: 300, tier: "SULIT", type: "text", question: "Tingkatan norma sosial yang sanksinya berupa celaan atau cemoohan masyarakat karena melanggar kebiasaan adalah?", answer: "FOLKWAYS" },
+            { id: 28, points: 300, tier: "SULIT", type: "text", question: "English Vocabulary: What word means 'lasting for a very short time' (starts with E)?", answer: "EPHEMERAL" },
+            { id: 29, points: 300, tier: "SULIT", type: "text", question: "Sebuah mobil menempuh jarak 180 km dalam waktu 2 jam 30 menit. Kecepatan rata-rata mobil tersebut adalah...?", answer: "72" },
+            { id: 30, points: 300, tier: "SULIT", type: "text", question: "Prasasti peninggalan Kerajaan Tarumanegara yang terdapat sepasang telapak kaki Raja Purnawarman adalah prasasti?", answer: "CIARUTEUN" }
+        ];
+
+        /* --------------------------------------------------------------------------
+           2. STATE APLIKASI GLOBAL
+           -------------------------------------------------------------------------- */
+        let teams = [];
+        let selectedTeamId = 0;
+        let vaultStates = [];
+        let timerSeconds = 15 * 60;
+        let timerInterval = null;
+        let isPaused = false;
+        let activeVaultId = null;
+        let previousScreenId = 'screen-setup';
+        let activeTeacherTab = 'student';
+
+        /* --------------------------------------------------------------------------
+           3. NAVIGASI HALAMAN (showScreen)
+           -------------------------------------------------------------------------- */
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(id);
+            if (target) {
+                target.classList.add('active');
+                target.scrollTop = 0;
+            }
+            window.scrollTo(0, 0);
+        }
+
+        /* --------------------------------------------------------------------------
+           4. WEB AUDIO API SYNTHESIZER
+           -------------------------------------------------------------------------- */
+        let audioCtx = null;
+        let bgmPlaying = false;
+        let bgmInterval = null;
+        let bgmStep = 0;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContextClass();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playTone(freq, type, duration, gainVal = 0.12, delay = 0) {
+            try {
+                initAudio();
+                const now = audioCtx.currentTime + delay;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(gainVal, now);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + duration);
+            } catch (e) {
+                // Abaikan jika browser memblokir audio sebelum interaksi pertama
+            }
+        }
+
+        function playSuccessSFX() {
+            playTone(523.25, 'triangle', 0.25, 0.2, 0.00);
+            playTone(659.25, 'triangle', 0.25, 0.2, 0.08);
+            playTone(783.99, 'triangle', 0.30, 0.2, 0.16);
+            playTone(1046.50, 'sine', 0.60, 0.25, 0.24);
+        }
+
+        function playErrorSFX() {
+            playTone(140, 'sawtooth', 0.25, 0.22, 0.00);
+            playTone(110, 'sawtooth', 0.35, 0.25, 0.15);
+        }
+
+        function playClickSFX() {
+            playTone(880, 'sine', 0.05, 0.05, 0);
+        }
+
+        function startBGM() {
+            initAudio();
+            if (bgmInterval) clearInterval(bgmInterval);
+            bgmPlaying = true;
+            updateBGMButtonUI();
+
+            const bassNotes = [146.83, 146.83, 174.61, 146.83, 196.00, 196.00, 220.00, 174.61];
+            const arpNotes  = [587.33, 698.46, 880.00, 698.46, 783.99, 880.00, 1046.50, 880.00];
+
+            bgmInterval = setInterval(() => {
+                if (!bgmPlaying || isPaused) return;
+                const idx = bgmStep % bassNotes.length;
+                playTone(bassNotes[idx], 'triangle', 0.22, 0.055, 0);
+                if (bgmStep % 2 === 0) {
+                    playTone(arpNotes[idx], 'sine', 0.15, 0.03, 0.05);
+                }
+                bgmStep++;
+            }, 260);
+        }
+
+        function stopBGM() {
+            bgmPlaying = false;
+            if (bgmInterval) clearInterval(bgmInterval);
+            updateBGMButtonUI();
+        }
+
+        function toggleBGM() {
+            if (bgmPlaying) {
+                stopBGM();
+            } else {
+                startBGM();
+            }
+        }
+
+        function updateBGMButtonUI() {
+            const icon = document.getElementById('bgm-icon');
+            const label = document.getElementById('bgm-label');
+            if (bgmPlaying) {
+                icon.textContent = '🔊';
+                label.textContent = 'BGM ON';
+            } else {
+                icon.textContent = '🔇';
+                label.textContent = 'BGM OFF';
+            }
+        }
+
+        /* --------------------------------------------------------------------------
+           5. SETUP SCREEN LOGIC
+           -------------------------------------------------------------------------- */
+        function generateTeamNameInputs() {
+            const countInput = document.getElementById('input-team-count');
+            let count = parseInt(countInput.value, 10);
+            if (isNaN(count) || count < 1) count = 1;
+            if (count > 16) count = 16;
+
+            const container = document.getElementById('team-names-container');
+            const existingValues = Array.from(container.querySelectorAll('input')).map(inp => inp.value);
+            container.innerHTML = '';
+
+            for (let i = 0; i < count; i++) {
+                const defaultName = existingValues[i] || `Tim ${i + 1}`;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex items-center bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 focus-within:border-cyan-400';
+                wrapper.innerHTML = `
+                    <span class="text-[10px] font-esport font-bold text-cyan-400 mr-1.5 shrink-0">#${i + 1}</span>
+                    <input type="text" value="${defaultName}" maxlength="18"
+                        class="w-full bg-transparent text-[11px] sm:text-xs font-semibold text-white focus:outline-none min-w-0"
+                        placeholder="Tim ${i + 1}">
+                `;
+                container.appendChild(wrapper);
+            }
+        }
+
+        function startArenaMatch() {
+            const teamInputs = document.querySelectorAll('#team-names-container input');
+            teams = Array.from(teamInputs).map((inp, idx) => ({
+                id: idx,
+                name: inp.value.trim() || `Tim ${idx + 1}`,
+                score: 0,
+                solvedCount: 0
+            }));
+
+            let mins = parseInt(document.getElementById('input-duration').value, 10);
+            if (isNaN(mins) || mins < 1) mins = 15;
+            timerSeconds = mins * 60;
+            isPaused = false;
+
+            vaultStates = VAULT_QUESTIONS.map(q => ({
+                id: q.id,
+                unlocked: false,
+                unlockedBy: null
+            }));
+
+            selectedTeamId = 0;
+            updateActiveTeamIndicator();
+
+            renderLeaderboard();
+            renderVaultGrid();
+            updateTimerUI();
+            updateProgressUI();
+
+            previousScreenId = 'screen-arena';
+            showScreen('screen-arena');
+
+            startTimerLoop();
+            startBGM();
+        }
+
+        /* --------------------------------------------------------------------------
+           6. ARENA SCREEN: TIMER, LEADERBOARD & GRID 30 VAULT
+           -------------------------------------------------------------------------- */
+        function startTimerLoop() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (isPaused) return;
+                if (timerSeconds > 0) {
+                    timerSeconds--;
+                    updateTimerUI();
+                } else {
+                    clearInterval(timerInterval);
+                    triggerGameOver();
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            const mins = Math.floor(timerSeconds / 60);
+            const secs = timerSeconds % 60;
+            const display = document.getElementById('timer-display');
+            const box = document.getElementById('timer-box');
+
+            display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+            if (timerSeconds <= 120 && timerSeconds > 0) {
+                box.classList.add('timer-critical');
+            } else {
+                box.classList.remove('timer-critical');
+            }
+        }
+
+        function togglePauseTimer() {
+            isPaused = !isPaused;
+            const icon = document.getElementById('pause-icon');
+            const label = document.getElementById('pause-label');
+            if (isPaused) {
+                icon.textContent = '▶';
+                label.textContent = 'RESUME';
+            } else {
+                icon.textContent = '⏸';
+                label.textContent = 'PAUSE';
+            }
+        }
+
+        function selectActiveTeam(teamId) {
+            selectedTeamId = teamId;
+            playClickSFX();
+            updateActiveTeamIndicator();
+            renderLeaderboard();
+
+            const hiddenInput = document.getElementById('modal-team-select');
+            if (hiddenInput) {
+                hiddenInput.value = teamId;
+                renderModalTeamButtons();
+            }
+        }
+
+        function updateActiveTeamIndicator() {
+            const indicator = document.getElementById('active-team-indicator');
+            const activeTeam = teams.find(t => t.id === selectedTeamId) || teams[0];
+            if (indicator && activeTeam) {
+                indicator.textContent = `${activeTeam.name.toUpperCase()} (${activeTeam.score})`;
+            }
+        }
+
+        function renderLeaderboard() {
+            const container = document.getElementById('arena-leaderboard');
+            const maxScore = Math.max(...teams.map(t => t.score));
+            container.innerHTML = teams.map((team) => {
+                const isLeader = maxScore > 0 && team.score === maxScore;
+                const isSelected = team.id === selectedTeamId;
+                const baseStyle = isLeader
+                    ? 'bg-amber-500/20 border-amber-400 text-amber-200'
+                    : 'bg-slate-950/90 border-slate-700 text-slate-200';
+                const selectedClass = isSelected ? 'selected-team ring-1 ring-cyan-300' : '';
+                return `
+                    <button type="button" onclick="selectActiveTeam(${team.id})" title="Klik untuk memilih ${team.name}"
+                        class="team-pill-btn ${selectedClass} flex items-center gap-1 px-2 py-0.5 sm:py-1 rounded-lg border ${baseStyle} shrink-0">
+                        <span class="text-[9px] sm:text-[10px] font-esport font-black ${isSelected ? 'text-cyan-300' : (isLeader ? 'text-amber-400' : 'text-slate-400')}">
+                            ${isLeader ? '👑' : '●'}
+                        </span>
+                        <span class="text-[11px] sm:text-xs font-bold truncate max-w-[76px] sm:max-w-[95px]">${team.name}</span>
+                        <span class="font-esport text-[10px] sm:text-xs font-black text-white bg-slate-800 px-1.5 py-0.5 rounded">${team.score}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function updateProgressUI() {
+            const opened = vaultStates.filter(v => v.unlocked).length;
+            const desktopProg = document.getElementById('arena-progress-text');
+            const mobileProg = document.getElementById('arena-progress-mobile');
+            if (desktopProg) desktopProg.textContent = `${opened} / 30 TERBUKA`;
+            if (mobileProg) mobileProg.textContent = `${opened}/30`;
+        }
+
+        function renderVaultGrid() {
+            const grid = document.getElementById('vault-grid');
+            grid.innerHTML = '';
+
+            VAULT_QUESTIONS.forEach((q, idx) => {
+                const state = vaultStates[idx];
+                const card = document.createElement('button');
+                card.type = 'button';
+
+                let glowClass = 'glow-cyan';
+                let badgeColor = 'text-cyan-300 bg-cyan-950/90 border-cyan-400/50';
+                if (q.id >= 11 && q.id <= 20) {
+                    glowClass = 'glow-gold';
+                    badgeColor = 'text-amber-300 bg-amber-950/90 border-amber-400/50';
+                } else if (q.id >= 21) {
+                    glowClass = 'glow-crimson';
+                    badgeColor = 'text-rose-300 bg-rose-950/90 border-rose-400/50';
+                }
+
+                if (state.unlocked) {
+                    card.className = 'vault-card unlocked border-2 rounded-lg sm:rounded-xl p-1 flex flex-col items-center justify-center relative overflow-hidden min-h-0';
+                    card.disabled = true;
+                    card.innerHTML = `
+                        <div class="text-amber-400 text-sm sm:text-xl leading-none">🔓</div>
+                        <div class="font-esport text-[9px] sm:text-xs font-bold text-amber-200 leading-tight">#${String(q.id).padStart(2, '0')}</div>
+                        <div class="mt-0.5 px-1.5 py-0.2 rounded bg-amber-500 text-slate-950 font-extrabold text-[8px] sm:text-[11px] truncate max-w-full">
+                            ${state.unlockedBy}
+                        </div>
+                    `;
+                } else {
+                    card.className = `vault-card ${glowClass} border-2 rounded-lg sm:rounded-xl p-1 flex flex-col items-center justify-center relative overflow-hidden cursor-pointer min-h-0`;
+                    card.onclick = () => openVaultModal(q.id);
+                    card.innerHTML = `
+                        <div class="flex items-center gap-0.5 sm:gap-1 text-slate-300 mb-0.5">
+                            <svg class="w-3 h-3 sm:w-4 sm:h-4 text-current shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                            <span class="font-esport text-[11px] sm:text-sm md:text-base font-black text-white tracking-tight sm:tracking-wider">#${String(q.id).padStart(2, '0')}</span>
+                        </div>
+                        <span class="px-1.5 sm:px-2 py-0.2 rounded-full border ${badgeColor} font-esport text-[8px] sm:text-[11px] font-extrabold leading-tight">
+                            ${q.points} PTS
+                        </span>
+                    `;
+                }
+                grid.appendChild(card);
+            });
+        }
+
+        /* --------------------------------------------------------------------------
+           7. MODAL INPUT PASSWORD & VIRTUAL KEYBOARD ADAPTIF
+           -------------------------------------------------------------------------- */
+        function openVaultModal(vaultId) {
+            const q = VAULT_QUESTIONS.find(item => item.id === vaultId);
+            const state = vaultStates.find(item => item.id === vaultId);
+            if (!q || state.unlocked) return;
+
+            activeVaultId = vaultId;
+            playClickSFX();
+
+            document.getElementById('modal-vault-title').textContent = `VAULT #${String(q.id).padStart(2, '0')} — ${q.points} PTS`;
+            const tierEl = document.getElementById('modal-vault-tier');
+            tierEl.textContent = `LEVEL ${q.tier}`;
+
+            document.getElementById('modal-team-select').value = selectedTeamId;
+            renderModalTeamButtons();
+
+            const input = document.getElementById('modal-password-input');
+            input.value = '';
+
+            renderAdaptiveKeyboard(q.type);
+
+            const modal = document.getElementById('modal-vault-input');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function renderModalTeamButtons() {
+            const grid = document.getElementById('modal-team-buttons-grid');
+            const badge = document.getElementById('modal-selected-team-badge');
+            const currentTeam = teams.find(t => t.id === selectedTeamId) || teams[0];
+            if (badge && currentTeam) {
+                badge.textContent = `TERPILIH: ${currentTeam.name.toUpperCase()}`;
+            }
+
+            grid.innerHTML = teams.map(t => {
+                const isSelected = t.id === selectedTeamId;
+                return `
+                    <button type="button" onclick="selectActiveTeam(${t.id})"
+                        class="team-grid-card ${isSelected ? 'active-choice' : 'bg-slate-950 hover:bg-slate-800 border-slate-700 text-slate-200'} border rounded-lg px-1.5 py-1 flex flex-col items-center justify-center text-center">
+                        <span class="text-[10px] sm:text-[11px] font-bold truncate w-full">${t.name}</span>
+                        <span class="font-esport text-[9px] ${isSelected ? 'text-amber-200' : 'text-cyan-400'} font-extrabold">${t.score}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function closeVaultModal() {
+            const modal = document.getElementById('modal-vault-input');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            activeVaultId = null;
+        }
+
+        function renderAdaptiveKeyboard(type) {
+            const container = document.getElementById('virtual-keyboard-container');
+            const label = document.getElementById('keyboard-mode-label');
+            container.innerHTML = '';
+
+            if (type === 'binary') {
+                label.textContent = 'NUMPAD BINER (0 & 1)';
+                const row = document.createElement('div');
+                row.className = 'grid grid-cols-4 gap-1.5';
+                const keys = [
+                    { label: '0', action: () => appendKey('0'), style: 'bg-cyan-900/70 hover:bg-cyan-700 border-cyan-400 text-white text-xl' },
+                    { label: '1', action: () => appendKey('1'), style: 'bg-cyan-900/70 hover:bg-cyan-700 border-cyan-400 text-white text-xl' },
+                    { label: '⌫', action: () => backspaceKey(), style: 'bg-amber-900/60 hover:bg-amber-700 border-amber-400 text-amber-200 text-sm' },
+                    { label: 'CLEAR', action: () => clearModalInput(), style: 'bg-rose-900/60 hover:bg-rose-700 border-rose-400 text-rose-200 text-xs' }
+                ];
+                keys.forEach(k => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = `py-3 rounded-xl border font-esport font-black cursor-pointer transition active:scale-95 ${k.style}`;
+                    btn.textContent = k.label;
+                    btn.onclick = k.action;
+                    row.appendChild(btn);
+                });
+                container.appendChild(row);
+            } else {
+                label.textContent = 'TOUCH KEYBOARD (HP / SMART BOARD)';
+                const rows = [
+                    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+                    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+                    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+                    ['Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
+                ];
+
+                rows.forEach(r => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'flex justify-center gap-0.5 sm:gap-1';
+                    r.forEach(char => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        const isDel = char === '⌫';
+                        btn.className = `flex-1 max-w-[50px] py-1.5 sm:py-2 rounded-md sm:rounded-lg font-esport text-[11px] sm:text-xs font-bold border cursor-pointer transition active:scale-90 ${
+                            isDel
+                                ? 'bg-rose-800/80 border-rose-400 text-white'
+                                : 'bg-slate-800 hover:bg-cyan-800/70 border-slate-600 hover:border-cyan-400 text-white'
+                        }`;
+                        btn.textContent = char;
+                        btn.onclick = () => isDel ? backspaceKey() : appendKey(char);
+                        rowDiv.appendChild(btn);
+                    });
+                    container.appendChild(rowDiv);
+                });
+
+                const spaceRow = document.createElement('div');
+                spaceRow.className = 'flex justify-center mt-0.5';
+                const spaceBtn = document.createElement('button');
+                spaceBtn.type = 'button';
+                spaceBtn.className = 'w-2/3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 font-esport text-[10px] sm:text-xs font-bold text-slate-300 tracking-widest cursor-pointer';
+                spaceBtn.textContent = 'SPASI (SPACE)';
+                spaceBtn.onclick = () => appendKey(' ');
+                spaceRow.appendChild(spaceBtn);
+                container.appendChild(spaceRow);
+            }
+        }
+
+        function appendKey(char) {
+            playClickSFX();
+            const input = document.getElementById('modal-password-input');
+            input.value += char;
+        }
+
+        function backspaceKey() {
+            playClickSFX();
+            const input = document.getElementById('modal-password-input');
+            input.value = input.value.slice(0, -1);
+        }
+
+        function clearModalInput() {
+            playClickSFX();
+            document.getElementById('modal-password-input').value = '';
+        }
+
+        /* --------------------------------------------------------------------------
+           8. VERIFIKASI JAWABAN & OVERLAY BESAR
+           -------------------------------------------------------------------------- */
+        function submitVaultPassword() {
+            if (activeVaultId === null) return;
+            const q = VAULT_QUESTIONS.find(item => item.id === activeVaultId);
+            const state = vaultStates.find(item => item.id === activeVaultId);
+            const teamId = parseInt(document.getElementById('modal-team-select').value, 10);
+            const team = teams.find(t => t.id === teamId);
+            const userAns = document.getElementById('modal-password-input').value.trim().toUpperCase().replace(/\s+/g, ' ');
+            const correctAns = q.answer.trim().toUpperCase().replace(/\s+/g, ' ');
+
+            if (!userAns) return;
+
+            closeVaultModal();
+
+            if (userAns === correctAns) {
+                state.unlocked = true;
+                state.unlockedBy = team.name;
+                team.score += q.points;
+                team.solvedCount += 1;
+
+                playSuccessSFX();
+                launchConfetti(120);
+                updateActiveTeamIndicator();
+                renderLeaderboard();
+                renderVaultGrid();
+                updateProgressUI();
+
+                showFeedbackOverlay(
+                    true,
+                    'ACCESS GRANTED!',
+                    `VAULT #${String(q.id).padStart(2, '0')} UNLOCKED! +${q.points} PTS UNTUK ${team.name.toUpperCase()}`
+                );
+            } else {
+                playErrorSFX();
+                showFeedbackOverlay(
+                    false,
+                    'ACCESS DENIED!',
+                    `KODE PASSWORD SALAH! SILAKAN COBA LAGI.`
+                );
+            }
+        }
+
+        function showFeedbackOverlay(isSuccess, title, subtitle) {
+            const overlay = document.getElementById('modal-feedback');
+            const card = document.getElementById('feedback-card');
+            const icon = document.getElementById('feedback-icon');
+            const titleEl = document.getElementById('feedback-title');
+            const subEl = document.getElementById('feedback-subtitle');
+
+            card.classList.remove('animate-shake');
+
+            if (isSuccess) {
+                overlay.style.backgroundColor = 'rgba(6, 78, 59, 0.88)';
+                card.className = 'w-full max-w-2xl rounded-3xl p-6 sm:p-10 text-center border-4 border-emerald-300 bg-gradient-to-b from-emerald-600 to-teal-900 text-white shadow-[0_0_60px_rgba(16,185,129,0.85)]';
+                icon.textContent = '🔓✨';
+            } else {
+                overlay.style.backgroundColor = 'rgba(127, 29, 29, 0.88)';
+                card.className = 'w-full max-w-2xl rounded-3xl p-6 sm:p-10 text-center border-4 border-rose-300 bg-gradient-to-b from-rose-700 to-red-950 text-white shadow-[0_0_60px_rgba(244,63,94,0.85)] animate-shake';
+                icon.textContent = '🚫🔒';
+            }
+
+            titleEl.textContent = title;
+            subEl.textContent = subtitle;
+
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        }
+
+        function closeFeedbackModal() {
+            const overlay = document.getElementById('modal-feedback');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+
+            const allOpened = vaultStates.every(v => v.unlocked);
+            if (allOpened) {
+                triggerGameOver();
+            }
+        }
+
+        /* --------------------------------------------------------------------------
+           9. GAME OVER SCREEN & PODIUM SELEBRASI
+           -------------------------------------------------------------------------- */
+        function finishGameEarly() {
+            if (timerInterval) clearInterval(timerInterval);
+            triggerGameOver();
+        }
+
+        function triggerGameOver() {
+            if (timerInterval) clearInterval(timerInterval);
+            stopBGM();
+            playSuccessSFX();
+            launchConfetti(220);
+
+            const sorted = [...teams].sort((a, b) => b.score - a.score);
+
+            const podiumContainer = document.getElementById('podium-container');
+            const podiumOrder = [
+                { rank: 2, team: sorted[1], height: 'h-24 sm:h-36', bg: 'from-slate-400 to-slate-600', border: 'border-slate-200', medal: '🥈' },
+                { rank: 1, team: sorted[0], height: 'h-32 sm:h-44', bg: 'from-amber-400 via-yellow-500 to-amber-700', border: 'border-yellow-200', medal: '👑' },
+                { rank: 3, team: sorted[2], height: 'h-20 sm:h-28', bg: 'from-amber-700 to-orange-900', border: 'border-amber-500', medal: '🥉' }
+            ];
+
+            podiumContainer.innerHTML = podiumOrder.map(p => {
+                if (!p.team) return '';
+                return `
+                    <div class="flex flex-col items-center w-24 sm:w-36">
+                        <div class="text-xl sm:text-3xl mb-0.5">${p.medal}</div>
+                        <div class="font-bold text-[11px] sm:text-sm text-white truncate max-w-full px-1">${p.team.name}</div>
+                        <div class="font-esport text-[11px] sm:text-base font-black text-amber-300 mb-1">${p.team.score} PTS</div>
+                        <div class="w-full ${p.height} rounded-t-xl bg-gradient-to-b ${p.bg} border-t-4 ${p.border} flex items-center justify-center shadow-2xl">
+                            <span class="font-esport text-xl sm:text-4xl font-black text-slate-950">#${p.rank}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const tbody = document.getElementById('gameover-leaderboard-body');
+            tbody.innerHTML = sorted.map((t, i) => `
+                <tr class="${i === 0 ? 'bg-amber-500/15 text-amber-200 font-bold' : 'text-slate-200'}">
+                    <td class="py-1.5 px-2 sm:px-3 font-esport font-black">#${i + 1}</td>
+                    <td class="py-1.5 px-2 sm:px-3 font-bold">${t.name}</td>
+                    <td class="py-1.5 px-2 sm:px-3 text-center">${t.solvedCount}</td>
+                    <td class="py-1.5 px-2 sm:px-3 text-right font-esport font-black text-cyan-300">${t.score} PTS</td>
+                </tr>
+            `).join('');
+
+            showScreen('screen-gameover');
+        }
+
+        function resetToSetup() {
+            if (timerInterval) clearInterval(timerInterval);
+            stopBGM();
+            previousScreenId = 'screen-setup';
+            showScreen('screen-setup');
+        }
+
+        /* --------------------------------------------------------------------------
+           10. HALAMAN KHUSUS GURU (TEACHER DASHBOARD + PIN '1234' + PNG EXPORT)
+           -------------------------------------------------------------------------- */
+        function openTeacherAuthModal() {
+            const modal = document.getElementById('modal-teacher-auth');
+            document.getElementById('teacher-pin-input').value = '';
+            document.getElementById('teacher-auth-error').textContent = '';
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeTeacherAuthModal() {
+            const modal = document.getElementById('modal-teacher-auth');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function verifyTeacherPin() {
+            const pin = document.getElementById('teacher-pin-input').value.trim();
+            const card = document.getElementById('teacher-auth-card');
+            if (pin === '1234') {
+                closeTeacherAuthModal();
+                renderTeacherFantasyCards('student');
+                showScreen('screen-teacher');
+            } else {
+                playErrorSFX();
+                document.getElementById('teacher-auth-error').textContent = 'AKSES DITOLAK! PASSWORD SALAH.';
+                card.classList.remove('animate-shake');
+                void card.offsetWidth;
+                card.classList.add('animate-shake');
+            }
+        }
+
+        function switchTeacherTab(tab) {
+            activeTeacherTab = tab;
+            const btnStudent = document.getElementById('tab-btn-student');
+            const btnKey = document.getElementById('tab-btn-key');
+
+            if (tab === 'student') {
+                btnStudent.className = 'px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-emerald-600 text-white border border-emerald-400 cursor-pointer';
+                btnKey.className = 'px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-slate-800 text-slate-300 border border-slate-600 cursor-pointer';
+            } else {
+                btnKey.className = 'px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-amber-600 text-white border border-amber-400 cursor-pointer';
+                btnStudent.className = 'px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-slate-800 text-slate-300 border border-slate-600 cursor-pointer';
+            }
+            renderTeacherFantasyCards(tab);
+        }
+
+        function renderTeacherFantasyCards(mode) {
+            const sheet = document.getElementById('a4-fantasy-sheet');
+            sheet.innerHTML = VAULT_QUESTIONS.map(q => {
+                const answerBlock = mode === 'key'
+                    ? `<div class="mt-1 px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-esport font-black text-[9px] tracking-wider uppercase text-center">
+                         KEY: ${q.answer}
+                       </div>`
+                    : `<div class="mt-1 border-b border-dashed border-emerald-400/60 text-[8px] text-emerald-300/80 text-center">
+                         KODE: ................
+                       </div>`;
+
+                return `
+                    <div class="fantasy-card">
+                        <div class="flex justify-between items-center border-b border-amber-500/40 pb-0.5">
+                            <span class="font-esport text-[8px] font-black text-amber-300">VAULT #${String(q.id).padStart(2, '0')}</span>
+                            <span class="text-[8px] font-bold text-emerald-300">${q.points} PTS</span>
+                        </div>
+                        <div class="flex-1 flex items-center justify-center text-center px-0.5 my-0.5">
+                            <p class="text-[8.5px] leading-[1.2] font-semibold text-white">${q.question}</p>
+                        </div>
+                        ${answerBlock}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function downloadTeacherSheetImage() {
+            const sheet = document.getElementById('a4-fantasy-sheet');
+            html2canvas(sheet, { scale: 2, backgroundColor: '#090d16' }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = activeTeacherTab === 'student'
+                    ? 'ClashOfChampions_KartuSoal_5x6.png'
+                    : 'ClashOfChampions_KunciJawaban_5x6.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        function printTeacherCards() {
+            document.body.classList.add('print-teacher-cards');
+            window.print();
+            setTimeout(() => {
+                document.body.classList.remove('print-teacher-cards');
+            }, 500);
+        }
+
+        function returnFromTeacherDashboard() {
+            showScreen(previousScreenId);
+        }
+
+        /* --------------------------------------------------------------------------
+           11. RENDER LEMBAR SOAL CETAK A4 HEMAT TINTA (@media print)
+           -------------------------------------------------------------------------- */
+        function renderPrintableWorksheet() {
+            const grid = document.getElementById('print-questions-grid');
+            const keyBody = document.getElementById('print-answer-key-body');
+
+            grid.innerHTML = VAULT_QUESTIONS.map(q => `
+                <div class="print-box" style="border: 1.5px solid #000; border-radius: 6px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between; min-height: 92px;">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #000; padding-bottom: 3px; margin-bottom: 5px; font-size: 10px; font-weight: 800;">
+                        <span>KARTU VAULT #${String(q.id).padStart(2, '0')} (${q.tier})</span>
+                        <span>[${q.points} POIN]</span>
+                    </div>
+                    <div style="font-size: 11px; line-height: 1.35; margin-bottom: 6px;">
+                        ${q.question}
+                    </div>
+                    <div style="border: 1px solid #000; background: #f9fafb; padding: 4px 6px; font-size: 10px; font-weight: 700;">
+                        PASSWORD VAULT: ..................................................
+                    </div>
+                </div>
+            `).join('');
+
+            keyBody.innerHTML = VAULT_QUESTIONS.map(q => `
+                <tr>
+                    <td style="border: 1px solid #000; padding: 4px; font-weight: 800; text-align: center;">#${String(q.id).padStart(2, '0')}</td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;">${q.points}</td>
+                    <td style="border: 1px solid #000; padding: 4px;">${q.question}</td>
+                    <td style="border: 1px solid #000; padding: 4px; font-weight: 900; font-family: monospace; font-size: 12px;">${q.answer}</td>
+                </tr>
+            `).join('');
+        }
+
+        /* --------------------------------------------------------------------------
+           12. CONFETTI VISUAL EFFECT
+           -------------------------------------------------------------------------- */
+        let confettiParticles = [];
+        let confettiAnimating = false;
+
+        function launchConfetti(count = 100) {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const colors = ['#00f2fe', '#ffb703', '#10b981', '#ffffff', '#f59e0b'];
+            for (let i = 0; i < count; i++) {
+                confettiParticles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    w: Math.random() * 10 + 5,
+                    h: Math.random() * 6 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vy: Math.random() * 4 + 2,
+                    vx: (Math.random() - 0.5) * 3,
+                    rot: Math.random() * 360
+                });
+            }
+
+            if (!confettiAnimating) {
+                confettiAnimating = true;
+                animateConfetti();
+            }
+        }
+
+        function animateConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            confettiParticles.forEach((p, idx) => {
+                p.y += p.vy;
+                p.x += p.vx;
+                p.rot += 4;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rot * Math.PI) / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                ctx.restore();
+
+                if (p.y > canvas.height) {
+                    confettiParticles.splice(idx, 1);
+                }
+            });
+
+            if (confettiParticles.length > 0) {
+                requestAnimationFrame(animateConfetti);
+            } else {
+                confettiAnimating = false;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        /* --------------------------------------------------------------------------
+           13. INISIALISASI SAAT HALAMAN DIMUAT
+           -------------------------------------------------------------------------- */
+        window.onload = function () {
+            generateTeamNameInputs();
+            renderPrintableWorksheet();
+            showScreen('screen-setup');
+
+            document.getElementById('modal-password-input').addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    submitVaultPassword();
+                }
+            });
+            document.getElementById('teacher-pin-input').addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    verifyTeacherPin();
+                }
+            });
+        };
+    </script>
+</body>
+</html>
